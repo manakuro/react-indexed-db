@@ -165,6 +165,20 @@ export function DBOperations(dbName: string, version: number, currentStore: stri
           };
         });
       });
+    },
+    getAllByIndex(indexName: string, key: any) {
+      return new Promise<any>((resolve, reject) => {
+        openDatabase(dbName, version).then(db => {
+          validateBeforeTransaction(db, currentStore, reject);
+          let transaction = createTransaction(db, optionsGenerator(DBMode.readonly, currentStore, reject, resolve)),
+            objectStore = transaction.objectStore(currentStore),
+            index = objectStore.index(indexName),
+            request = index.getAll(key);
+          request.onsuccess = (event: Event) => {
+            resolve((<IDBOpenDBRequest>event.target).result);
+          };
+        });
+      });
     }
   };
 }
